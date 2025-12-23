@@ -1,0 +1,8 @@
+{
+  "name": "Cridge",
+  "description": "The AI bridge for your community vibes. Short-form, high energy.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
