@@ -55,3 +55,49 @@ export const getCommunityVibeDescription = async (communityName: string) => {
     return "The energy is high and the builds are legendary! 🔥";
   }
 };
+
+export interface ResearchResult {
+  text: string;
+  sources: { title: string; uri: string }[];
+}
+
+export const performDeepResearch = async (topic: string): Promise<ResearchResult> => {
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: `Perform a deep research on the following topic for a high-tech community: "${topic}". Provide a detailed, insightful summary and mention key upcoming trends. Use Google Search to get real-time info.`,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+
+    const text = response.text || "No research findings found.";
+    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const sources = chunks
+      .filter((c: any) => c.web)
+      .map((c: any) => ({
+        title: c.web.title || 'Source',
+        uri: c.web.uri,
+      }));
+
+    return { text, sources };
+  } catch (error) {
+    console.error("Research failed:", error);
+    return {
+      text: "Research pipeline experienced a glitch. The vibe was too strong for the servers.",
+      sources: []
+    };
+  }
+};
+
+export const getBackendInsight = async (activeUsers: number) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Given ${activeUsers} active users on a GKE-backed social network, provide a short, tech-heavy "System Optimization Log" message. Mention scaling, pods, or latency. Make it sound like a hacker command center.`,
+    });
+    return response.text;
+  } catch {
+    return "Pods optimized. Scaling cluster to handle peak vibe intensity.";
+  }
+};

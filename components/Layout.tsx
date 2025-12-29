@@ -7,14 +7,15 @@ interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onProfileClick: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onProfileClick }) => {
   return (
     <div className="flex flex-col h-full bg-[#050507] overflow-hidden">
       {/* App Header */}
       <header className="glass px-6 pt-6 pb-4 flex items-center justify-between border-b border-white/5 z-50">
-        <div className="flex items-center gap-2" onClick={() => setActiveTab('feed')}>
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('feed')}>
           <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-pink-500 rounded-xl flex items-center justify-center font-black text-white italic shadow-lg shadow-violet-600/20">C</div>
           <span className="font-extrabold text-2xl tracking-tighter gradient-text">Cridge</span>
         </div>
@@ -23,9 +24,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             <Bell size={20} className="text-zinc-300" />
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-pink-500 rounded-full border-2 border-[#050507]"></span>
           </button>
-          <div className="w-10 h-10 rounded-2xl border border-white/10 p-0.5 overflow-hidden">
+          <button 
+            onClick={onProfileClick}
+            className="w-10 h-10 rounded-2xl border border-white/10 p-0.5 overflow-hidden active:scale-90 transition-transform"
+          >
             <img src={MOCK_USER.avatar} alt="Me" className="w-full h-full rounded-[14px] object-cover" />
-          </div>
+          </button>
         </div>
       </header>
 

@@ -38,3 +38,20 @@ export interface Post {
   media?: string;
   communityId?: string;
 }
+
+export interface Message {
+  id: string;
+  senderId: string;
+  text: string;
+  timestamp: string;
+  isAI?: boolean;
+}
+
+export interface ChatRoom {
+  id: string;
+  peerId: string;
+  peerName: string;
+  peerAvatar: string;
+  lastMessage: string;
+  unreadCount: number;
+}
