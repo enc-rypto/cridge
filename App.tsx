@@ -9,7 +9,6 @@ import { ProfileModal } from './components/ProfileModal';
 import { SettingsModal } from './components/SettingsModal';
 import { GuildDetail } from './components/GuildDetail';
 import { DeepResearch } from './components/DeepResearch';
-import { BackendDashboard } from './components/BackendDashboard';
 import { Messaging } from './components/Messaging';
 import { Login } from './components/Login';
 import { Community } from './types';
@@ -63,8 +62,6 @@ const App: React.FC = () => {
         return <DeepResearch />;
       case 'messages':
         return <Messaging />;
-      case 'system':
-        return <BackendDashboard />;
       default:
         return <Feed onStartWave={() => setShowCreateWave(true)} />;
     }

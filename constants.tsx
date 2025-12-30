@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Users, Play, BrainCircuit, LayoutGrid, Terminal, MessageSquare } from 'lucide-react';
+import { Users, Play, BrainCircuit, LayoutGrid, MessageSquare } from 'lucide-react';
 import { Community, User, ShortContent } from './types';
 
 export const NAV_ITEMS = [
@@ -9,7 +9,6 @@ export const NAV_ITEMS = [
   { id: 'messages', label: 'Chat', icon: <MessageSquare size={24} /> },
   { id: 'shorts', label: 'Sparks', icon: <Play size={24} /> },
   { id: 'communities', label: 'Guilds', icon: <Users size={24} /> },
-  { id: 'system', label: 'Node', icon: <Terminal size={24} /> },
 ];
 
 export const MOCK_USER: User = {

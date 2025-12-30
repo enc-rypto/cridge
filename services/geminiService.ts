@@ -1,7 +1,8 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Initialize the GoogleGenAI client with the API key from environment variables.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getDailySparks = async (interests: string[]) => {
   try {
@@ -23,7 +24,7 @@ export const getDailySparks = async (interests: string[]) => {
         }
       }
     });
-    return JSON.parse(response.text);
+    return JSON.parse(response.text || '[]');
   } catch (error) {
     return [
       { title: "Desk Setup Tour", description: "Show off your aesthetic workspace vibe.", emoji: "💻" },
@@ -53,6 +54,19 @@ export const getCommunityVibeDescription = async (communityName: string) => {
     return response.text;
   } catch (error) {
     return "The energy is high and the builds are legendary! 🔥";
+  }
+};
+
+// Added missing getBackendInsight export for the BackendDashboard component.
+export const getBackendInsight = async (peerCount: number) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Generate a short, high-tech backend status insight for a GKE cluster with ${peerCount} concurrent peers. Keep it under 15 words, sounding like a futuristic system log with vibe-scaling terminology.`,
+    });
+    return response.text || "Cluster synchronization at 99.9% efficiency.";
+  } catch (error) {
+    return "Neural nodes operating at peak efficiency. Vibe protocol stable.";
   }
 };
 
@@ -87,17 +101,5 @@ export const performDeepResearch = async (topic: string): Promise<ResearchResult
       text: "Research pipeline experienced a glitch. The vibe was too strong for the servers.",
       sources: []
     };
-  }
-};
-
-export const getBackendInsight = async (activeUsers: number) => {
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `Given ${activeUsers} active users on a GKE-backed social network, provide a short, tech-heavy "System Optimization Log" message. Mention scaling, pods, or latency. Make it sound like a hacker command center.`,
-    });
-    return response.text;
-  } catch {
-    return "Pods optimized. Scaling cluster to handle peak vibe intensity.";
   }
 };

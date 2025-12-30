@@ -22,6 +22,7 @@
             overflow: hidden;
             height: 100vh;
             width: 100vw;
+            -webkit-tap-highlight-color: transparent;
         }
         .glass {
             background: rgba(18, 18, 23, 0.7);
@@ -40,18 +41,20 @@
         @media (min-width: 768px) {
             #root {
                 max-width: 430px;
-                margin: 20px auto;
-                height: calc(100vh - 40px);
+                margin: 0 auto;
+                height: 100vh;
                 position: relative;
-                box-shadow: 0 0 100px rgba(139, 92, 246, 0.2);
-                border: 8px solid #18181b;
-                border-radius: 48px;
-                overflow: hidden;
+                box-shadow: 0 0 100px rgba(139, 92, 246, 0.1);
+                border-left: 1px solid rgba(255,255,255,0.05);
+                border-right: 1px solid rgba(255,255,255,0.05);
+                background: #050507;
             }
         }
         
-        .tab-transition {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Material Ripple Simulation */
+        .ripple {
+          position: relative;
+          overflow: hidden;
         }
         
         @keyframes pulse-subtle {

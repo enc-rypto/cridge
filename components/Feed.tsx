@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Post } from '../types';
 import { MOCK_USER, MOCK_COMMUNITIES } from '../constants';
-import { Heart, MessageCircle, Sparkles, Image as ImageIcon, Plus, Share2, Zap } from 'lucide-react';
+import { Heart, MessageCircle, Sparkles, Image as ImageIcon, Plus, Share2, Zap, Send, RefreshCw } from 'lucide-react';
 import { generateCatchyCaption, getDailySparks, getCommunityVibeDescription } from '../services/geminiService';
 
 interface FeedProps {
@@ -65,14 +65,6 @@ export const Feed: React.FC<FeedProps> = ({ onStartWave }) => {
     setNewPost('');
   };
 
-  const handleRefine = async () => {
-    if (!newPost.trim()) return;
-    setIsRefining(true);
-    const refined = await generateCatchyCaption(newPost);
-    setNewPost(refined || newPost);
-    setIsRefining(false);
-  };
-
   const toggleLike = (postId: string) => {
     const newLiked = new Set(likedPosts);
     if (newLiked.has(postId)) {
@@ -84,156 +76,139 @@ export const Feed: React.FC<FeedProps> = ({ onStartWave }) => {
   };
 
   return (
-    <div className="p-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
+    <div className="px-4 pb-24 pt-2 space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
       
-      {/* AI Vibe Hook */}
-      <section className="relative overflow-hidden glass rounded-[32px] p-6 border-violet-500/30 bg-gradient-to-br from-violet-600/10 to-pink-500/10 border shadow-lg shadow-violet-500/5">
-        <div className="flex items-center gap-2 mb-3">
-          <Zap size={16} className="text-yellow-400 fill-yellow-400" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-400">Vibe Check</span>
+      {/* Vibe Summary Card */}
+      <section className="bg-violet-600/10 border border-violet-500/20 rounded-[28px] p-6 shadow-sm overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-4 -translate-y-4">
+          <Zap size={120} strokeWidth={3} />
         </div>
-        <div className="min-h-[60px] flex flex-col justify-center">
-          {isCheckingVibe ? (
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-violet-400 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-violet-400 rounded-full animate-bounce delay-100"></div>
-              <div className="w-2 h-2 bg-violet-400 rounded-full animate-bounce delay-200"></div>
-            </div>
-          ) : (
-            <p className="text-lg font-bold italic leading-tight text-white tracking-tight">
-              "{vibeHook}"
-            </p>
-          )}
+        <div className="flex items-center justify-between mb-3 relative z-10">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-4 bg-violet-400 rounded-full"></div>
+            <span className="text-[11px] font-black uppercase tracking-widest text-violet-400">Current Energy</span>
+          </div>
+          <button 
+            onClick={handleVibeCheck}
+            disabled={isCheckingVibe}
+            className="p-2 hover:bg-white/5 rounded-full transition-all active:scale-90 disabled:opacity-50"
+            title="Refresh vibe"
+          >
+            <RefreshCw size={14} className={`text-violet-400 ${isCheckingVibe ? 'animate-spin' : ''}`} />
+          </button>
         </div>
-        <button 
-          onClick={handleVibeCheck}
-          className="mt-4 flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
-        >
-          <Sparkles size={12} />
-          Sync Vibe
-        </button>
+        <p className="text-xl font-black italic text-white leading-tight pr-8 relative z-10">
+          {isCheckingVibe ? "Syncing..." : `"${vibeHook}"`}
+        </p>
       </section>
 
-      {/* Daily Sparks */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between px-2">
-          <h3 className="text-sm font-black italic tracking-tight text-zinc-400 uppercase">CONTENT SPARKS</h3>
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></div>
+      {/* Sparks Horizontal List */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Suggested Sparks</h3>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 hide-scrollbar -mx-4 px-4">
-          <button 
-            onClick={onStartWave}
-            className="shrink-0 w-36 h-48 rounded-[32px] glass border-dashed border-2 border-zinc-800 flex flex-col items-center justify-center gap-3 active:scale-95 transition-all"
-          >
-            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-zinc-500">
-              <Plus size={24} />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-tighter text-zinc-600">Start Wave</span>
-          </button>
+        <div className="flex gap-3 overflow-x-auto pb-4 hide-scrollbar -mx-4 px-4">
           {sparks.map((spark, i) => (
             <div 
               key={i} 
-              onClick={() => {
-                setNewPost(spark.description);
-                // Optional: scroll to the post input
-                window.scrollTo({ top: 300, behavior: 'smooth' });
-              }}
-              className="shrink-0 w-36 h-48 rounded-[32px] p-5 bg-gradient-to-br from-violet-600/20 to-pink-500/20 border border-white/10 flex flex-col justify-between group shadow-xl active:scale-95 transition-all cursor-pointer"
+              onClick={() => setNewPost(spark.description)}
+              className="shrink-0 w-32 h-40 rounded-[24px] p-4 bg-zinc-900 border border-white/5 flex flex-col justify-between active:scale-95 transition-all cursor-pointer hover:border-violet-500/30"
             >
-              <span className="text-3xl drop-shadow-lg">{spark.emoji}</span>
-              <p className="text-[11px] font-extrabold leading-snug text-white uppercase tracking-tight">{spark.title}</p>
+              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-xl">{spark.emoji}</div>
+              <p className="text-[10px] font-black uppercase leading-tight text-zinc-300">{spark.title}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Share Progress Card */}
-      <section id="post-input" className="glass p-5 rounded-[40px] border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent">
-        <div className="flex gap-4">
-          <img src={MOCK_USER.avatar} className="w-12 h-12 rounded-2xl border border-zinc-800 shadow-xl" alt="Me" />
+      {/* Post Input (Flutter Style Modal Bottom Sheet Feel) */}
+      <section className="bg-zinc-900/50 rounded-[32px] p-5 border border-white/5 flex flex-col gap-4">
+        <div className="flex gap-4 items-start">
+          <img src={MOCK_USER.avatar} className="w-10 h-10 rounded-full border border-white/10" alt="me" />
           <textarea
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
-            placeholder="What's the wave?"
-            className="flex-1 bg-transparent border-none focus:ring-0 text-base font-semibold resize-none placeholder-zinc-700 min-h-[50px] pt-3"
+            placeholder="Share the wave..."
+            className="flex-1 bg-transparent border-none focus:ring-0 text-zinc-100 placeholder:text-zinc-700 font-medium resize-none min-h-[60px] p-0"
           />
         </div>
-        <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-                <button className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-zinc-400 transition-colors">
-                    <ImageIcon size={20} />
-                </button>
-                <button 
-                    onClick={handleRefine}
-                    disabled={isRefining || !newPost}
-                    className="flex items-center gap-2 px-4 py-2 bg-violet-600/10 text-violet-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-violet-600/20 transition-all active:scale-95 disabled:opacity-30"
-                >
-                    <Sparkles size={14} className={isRefining ? 'animate-spin' : ''} />
-                    {isRefining ? 'Vibing...' : 'Add Sauce'}
-                </button>
-            </div>
-            <button 
-                onClick={handlePost}
-                disabled={!newPost}
-                className="px-8 py-2.5 bg-white text-black font-black rounded-2xl text-[12px] uppercase tracking-wider active:scale-95 transition-transform disabled:opacity-50 shadow-lg"
-            >
-                Post
+        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+          <div className="flex items-center gap-2">
+            <button className="p-2.5 rounded-xl bg-white/5 text-zinc-400 hover:text-white transition-colors">
+              <ImageIcon size={20} />
             </button>
+            <button 
+              onClick={handlePost}
+              disabled={!newPost.trim()}
+              className="p-2.5 rounded-xl bg-violet-600 text-white disabled:opacity-30 disabled:grayscale transition-all active:scale-90"
+            >
+              <Send size={20} />
+            </button>
+          </div>
+          <button 
+            onClick={() => generateCatchyCaption(newPost).then(setNewPost)}
+            className="flex items-center gap-2 px-4 py-2 bg-violet-600/10 text-violet-400 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+          >
+            <Sparkles size={14} /> Add Sauce
+          </button>
         </div>
       </section>
 
-      {/* Post Stream */}
-      <section className="space-y-6 pb-20">
+      {/* Post List */}
+      <section className="space-y-4">
         {posts.map((post) => {
-            const guild = MOCK_COMMUNITIES.find(c => c.id === post.communityId);
-            const isLiked = likedPosts.has(post.id);
-            return (
-                <article key={post.id} className="glass rounded-[48px] overflow-hidden border border-white/5 shadow-2xl transition-transform active:scale-[0.99]">
-                    <div className="p-5 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userId}`} className="w-11 h-11 rounded-full border-2 border-zinc-900 shadow-lg" alt="user" />
-                        <div>
-                          <h4 className="text-sm font-black text-zinc-100 tracking-tight uppercase">@{post.userId === MOCK_USER.id ? 'me' : `user_${post.userId}`}</h4>
-                          <div className="flex items-center gap-2">
-                             <span className="text-[10px] text-violet-400 font-bold uppercase tracking-tighter bg-violet-400/10 px-1.5 py-0.5 rounded">in {guild?.name || 'Waves'}</span>
-                             <span className="text-[10px] text-zinc-600 font-bold">• {post.timestamp}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="px-6 pb-6">
-                      <p className="text-zinc-200 text-base font-medium leading-relaxed tracking-tight">{post.content}</p>
-                    </div>
+          const isLiked = likedPosts.has(post.id);
+          return (
+            <div key={post.id} className="bg-zinc-900 border border-white/5 rounded-[28px] overflow-hidden transition-all hover:border-white/10">
+              <div className="p-4 flex items-center gap-3">
+                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userId}`} className="w-9 h-9 rounded-full bg-zinc-800" alt="u" />
+                <div className="flex-1">
+                  <h4 className="text-sm font-black text-zinc-100">@{post.userId === MOCK_USER.id ? 'me' : `peer_${post.userId}`}</h4>
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">{post.timestamp}</p>
+                </div>
+              </div>
+              
+              <div className="px-5 pb-4">
+                <p className="text-zinc-200 text-sm leading-relaxed">{post.content}</p>
+              </div>
 
-                    {post.media && (
-                      <div className="px-3 pb-3">
-                        <img src={post.media} className="w-full aspect-square object-cover rounded-[40px] border border-white/10" alt="content" />
-                      </div>
-                    )}
+              {post.media && (
+                <div className="px-2 pb-2">
+                  <img src={post.media} className="w-full aspect-video object-cover rounded-[20px]" alt="media" />
+                </div>
+              )}
 
-                    <div className="px-10 py-5 flex items-center justify-between border-t border-white/5 bg-white/[0.01]">
-                        <div className="flex items-center gap-12">
-                            <button 
-                              onClick={() => toggleLike(post.id)}
-                              className={`flex items-center gap-2.5 transition-all scale-110 ${isLiked ? 'text-pink-500 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]' : 'text-zinc-500 hover:text-pink-500'}`}
-                            >
-                                <Heart size={22} className={isLiked ? 'fill-pink-500' : ''} />
-                                <span className="text-xs font-black">{post.likes + (isLiked ? 1 : 0)}</span>
-                            </button>
-                            <button className="flex items-center gap-2.5 text-zinc-500 hover:text-violet-500 transition-all scale-110">
-                                <MessageCircle size={22} />
-                                <span className="text-xs font-black">{post.comments}</span>
-                            </button>
-                        </div>
-                        <button className="text-zinc-600 hover:text-white transition-colors">
-                            <Share2 size={20} />
-                        </button>
-                    </div>
-                </article>
-            );
+              <div className="px-6 py-4 flex items-center justify-between bg-white/5">
+                <div className="flex items-center gap-8">
+                  <button 
+                    onClick={() => toggleLike(post.id)}
+                    className={`flex items-center gap-2 transition-all ${isLiked ? 'text-pink-500 scale-110' : 'text-zinc-500'}`}
+                  >
+                    <Heart size={20} className={isLiked ? 'fill-pink-500' : ''} />
+                    <span className="text-xs font-black">{post.likes + (isLiked ? 1 : 0)}</span>
+                  </button>
+                  <button className="flex items-center gap-2 text-zinc-500">
+                    <MessageCircle size={20} />
+                    <span className="text-xs font-black">{post.comments}</span>
+                  </button>
+                </div>
+                <button className="text-zinc-500 hover:text-white transition-colors">
+                  <Share2 size={18} />
+                </button>
+              </div>
+            </div>
+          );
         })}
       </section>
+
+      {/* Flutter Style Floating Action Button (FAB) */}
+      <button 
+        onClick={onStartWave}
+        className="fixed bottom-[108px] right-6 h-16 w-16 bg-violet-600 text-white rounded-[24px] flex items-center justify-center shadow-[0_12px_32px_rgba(139,92,246,0.5)] active:scale-90 active:shadow-inner transition-all z-50 group overflow-hidden"
+      >
+        <Plus size={32} className="group-hover:rotate-90 transition-transform duration-300" />
+        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      </button>
     </div>
   );
 };
